@@ -1,0 +1,23 @@
+# Compiled binaries
+server
+client
+server_fixed
+client_fixed
+test_simd
+bench_mlkem
+
+# Logs
+*.log
+bench_both.log
+
+# Runtime keys (regenerated on server start)
+server_pk.bin
+
+# Temp directories
+c1/
+check/
+
+# Editor/OS junk
+*.o
+*.swp
+.DS_Store

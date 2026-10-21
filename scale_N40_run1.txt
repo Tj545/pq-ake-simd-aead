@@ -1,0 +1,153 @@
+[12:18:45] Server started (PID 385502)
+[12:18:47] Launching 40 clients...
+[12:18:47] All 40 clients launched, waiting...
+[12:19:06] Sending 10 broadcasts...
+[12:19:11] Sending quit via FIFO...
+[12:19:12] Waiting for server to exit...
+[12:19:17] Server still alive, sending SIGINT...
+
+===================================================
+RESULTS FOR N=40 CLIENTS
+===================================================
+  CRYPTOGRAPHIC PERFORMANCE REPORT
+  (Pure crypto execution time — excludes I/O, threading, alloc)
+================================================================
+
+--- PHASE 1: PER-CLIENT AUTHENTICATION (SERVER SIDE) -----------
+  Protocol: ML-KEM-768 + ML-DSA-65 + SHAKE256
+  Security: Transcript-bound sig + directional keys + session nonce
+  Note: ML-KEM uses liboqs AVX2-optimized NTT internally
+  Clients authenticated: 40
+
+  Client | Total(ms) | KEM-Gen(us) | KEM-Dec(us) | DSA-Sign(us) | THash(us) | KDF(us)
+  -------|-----------|-------------|-------------|--------------|-----------|--------
+     1   |    0.71   |      44.1   |      21.1   |       86.1   |   148.4   |   14.2
+     2   |    0.47   |      71.6   |      20.6   |       80.3   |    11.2   |   14.9
+     3   |    1.80   |      41.7   |      22.9   |      234.1   |    11.9   |   15.3
+     4   |    0.59   |      41.0   |      20.9   |      268.8   |    15.1   |   14.3
+     5   |    0.37   |      38.2   |      16.1   |      120.0   |    11.4   |   12.5
+     6   |    0.79   |     115.6   |      17.8   |      199.1   |    12.9   |   14.3
+     7   |    0.54   |      31.4   |      20.4   |      160.7   |    10.2   |   12.9
+     8   |    0.39   |      38.7   |      38.1   |      101.4   |    12.8   |   16.3
+     9   |    0.69   |      36.0   |      15.4   |      232.8   |     9.5   |   12.1
+    10   |    0.41   |      35.7   |      20.3   |      124.2   |    11.4   |   14.7
+    11   |    0.35   |      38.3   |      17.8   |       74.8   |    11.7   |   12.4
+    12   |    0.47   |      38.7   |      22.5   |      137.6   |     9.5   |   16.0
+    13   |    0.67   |      41.3   |      39.0   |      129.4   |    10.7   |   16.1
+    14   |    0.44   |      39.6   |      34.1   |      101.4   |    10.9   |   13.9
+    15   |    0.41   |      38.1   |      21.7   |      161.8   |     7.4   |   16.2
+    16   |    0.43   |      37.4   |      18.1   |      188.9   |    11.7   |   14.2
+    17   |    0.51   |      40.1   |      38.5   |       93.1   |    12.0   |   16.3
+    18   |    1.74   |      35.6   |      22.2   |      145.6   |    11.3   |   16.6
+    19   |    0.35   |      32.1   |      23.1   |       91.2   |     9.2   |   15.0
+    20   |    2.86   |      42.8   |      17.9   |       82.7   |    12.0   |   13.1
+    21   |    0.41   |      38.0   |      39.2   |      117.6   |    12.3   |   16.7
+    22   |    0.34   |      37.7   |      15.2   |       99.8   |    11.4   |    8.8
+    23   |    0.55   |      38.4   |      22.6   |      106.5   |    11.5   |   15.0
+    24   |    0.48   |      33.1   |      37.8   |      110.5   |    10.5   |   16.0
+    25   |    0.44   |      39.4   |      21.1   |      107.1   |    11.1   |   14.7
+    26   |    0.57   |      38.3   |      16.9   |      172.0   |    11.6   |   12.4
+    27   |    0.59   |      38.8   |      19.4   |      152.9   |    10.9   |   15.7
+    28   |    0.82   |      35.4   |      21.5   |      106.3   |    11.1   |   13.3
+    29   |    0.99   |      39.3   |      24.1   |       91.7   |    11.6   |   16.3
+    30   |    0.37   |      29.6   |      22.6   |       55.0   |     7.5   |   13.9
+    31   |    0.35   |      40.6   |      21.2   |       66.0   |     7.2   |   16.0
+    32   |    0.82   |      33.4   |      14.5   |       73.1   |     7.3   |    9.0
+    33   |    0.36   |      21.1   |      18.3   |       74.6   |     6.5   |   14.8
+    34   |    0.33   |      45.9   |      17.3   |      120.3   |    10.8   |   11.8
+    35   |    0.36   |      27.8   |      13.0   |       88.6   |     7.0   |    7.7
+    36   |    0.38   |      31.1   |      14.3   |      175.7   |     7.8   |    8.4
+    37   |    0.48   |      32.4   |      13.3   |      128.0   |    12.0   |    7.8
+    38   |    0.33   |      27.7   |      14.3   |       64.8   |     7.6   |    8.3
+    39   |    0.46   |      27.4   |      18.8   |      141.7   |     6.7   |   12.9
+    40   |    0.46   |      51.2   |      16.0   |      112.4   |     8.7   |    9.4
+
+  Averages (40 clients):
+    Total session: 0.62 ms  |  Pure crypto: 0.21 ms
+    ML-KEM keygen: 39.6 us  |  ML-KEM decaps: 21.8 us
+    ML-DSA sign:   124.5 us  |  Transcript hash: 13.8 us
+    SHAKE256 KDF:  13.5 us
+
+--- PHASE 2: SYMMETRIC AEAD (ChaCha20-Poly1305) ---------------
+
+  SERVER -> CLIENT (direct scalar, key_s2c, monotonic nonce):
+    Operations:  400
+    Total time:  0.58 ms
+    Per-message: 1.44 us
+
+  CLIENT -> SERVER (SIMD batch, key_c2s, monotonic nonce):
+    Batch size:       4 (AVX2 4-lane)
+    Total batches:    1000
+    Total messages:   4000
+
+    AVX2 SIMD:        2.38 us/batch  (0.59 us/msg)
+    (Scalar baseline measured separately; run 'make validate'
+     for per-size microbenchmark numbers in test_simd.)
+
+--- MESSAGE STATISTICS -----------------------------------------
+  [1] Client1       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [2] Client2       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [3] Client3       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [4] Client4       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [5] Client5       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [6] Client6       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [7] Client7       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [8] Client8       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [9] Client9       sent=10  recv=100  (0.2 KB / 1.9 KB)
+  [10] Client10      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [11] Client11      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [12] Client12      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [13] Client13      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [14] Client14      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [15] Client15      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [16] Client16      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [17] Client17      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [18] Client18      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [19] Client19      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [20] Client20      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [21] Client21      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [22] Client22      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [23] Client23      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [24] Client24      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [25] Client25      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [26] Client26      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [27] Client27      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [28] Client28      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [29] Client29      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [30] Client30      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [31] Client31      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [32] Client32      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [33] Client33      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [34] Client34      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [35] Client35      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [36] Client36      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [37] Client37      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [38] Client38      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [39] Client39      sent=10  recv=100  (0.2 KB / 2.0 KB)
+  [40] Client40      sent=10  recv=100  (0.2 KB / 2.0 KB)
+
+--- ADAPTIVE BATCH SCHEDULER -----------------------------------
+  Total messages:        4000
+  Full AVX2 batches:     1000 (100.0% of messages)
+  Scalar fallback:       0 (0.0% of messages)
+  Avg AVX2 per-batch:    2.38 us  (0.59 us/msg)
+  Note: scheduler routes partial-batch work to scalar to
+        avoid the 0.83x under-batched regime.
+
+--- SECURITY PROPERTIES ----------------------------------------
+  [x] Transcript-bound signature: Sign(H(pk_sig || pk_kem || ns))
+  [x] Transcript-bound KDF: SHAKE256("PQ-AKE" || ss || transcript)
+  [x] Directional keys: key_s2c != key_c2s (reflection-safe)
+  [x] Monotonic nonces: seq counter per direction (replay-safe)
+  [x] Ciphertext length validation
+  [x] Secret zeroization on cleanup
+
+--- IMPLEMENTATION NOTES ---------------------------------------
+  [x] ML-KEM-768: liboqs with AVX2-optimized NTT/poly ops
+  [x] ML-DSA-65:  liboqs with AVX2 internal optimization
+  [x] ChaCha20:   Real AVX2 4-lane parallel keystream gen
+  [x] Poly1305:   Scalar (per-stream)
+  [x] Batching:   Applied to symmetric AEAD only (not PQ)
+  [x] Speedup:    Measured on identical data, scalar vs AVX2
+================================================================
+

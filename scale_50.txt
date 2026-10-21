@@ -1,0 +1,157 @@
+[12:08:52] Server started (PID 339335)
+[12:08:54] Launching 50 clients...
+[12:08:54] All 50 clients launched, waiting...
+[12:09:14] Sending 10 broadcasts...
+[12:09:19] Sending quit via FIFO...
+[12:09:20] Waiting for server to exit...
+./run_bench_scale.sh: line 75: 339516 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339517 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339518 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339520 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339521 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339524 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339558 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339560 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339561 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339563 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339565 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339566 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339569 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339570 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339571 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339574 Killed                  | ./client Client$i > /dev/null 2>&1
+./run_bench_scale.sh: line 75: 339576 Done                    ( for j in $(seq 1 100);
+do
+    echo "msg $j from client $i"; sleep 0.01;
+done; sleep 20; echo "quit" )
+     339578 Killed                  | ./client Client$i > /dev/null 2>&1
+
+===================================================
+RESULTS FOR N=50 CLIENTS
+===================================================
+  CRYPTOGRAPHIC PERFORMANCE REPORT
+  (Pure crypto execution time — excludes I/O, threading, alloc)
+================================================================
+
+--- PHASE 1: PER-CLIENT AUTHENTICATION (SERVER SIDE) -----------
+  Protocol: ML-KEM-768 + ML-DSA-65 + SHAKE256
+  Security: Transcript-bound sig + directional keys + session nonce
+  Note: ML-KEM uses liboqs AVX2-optimized NTT internally
+  Clients authenticated: 20
+
+  Client | Total(ms) | KEM-Gen(us) | KEM-Dec(us) | DSA-Sign(us) | THash(us) | KDF(us)
+  -------|-----------|-------------|-------------|--------------|-----------|--------
+     1   |    0.85   |      56.9   |      22.8   |      217.9   |   156.1   |   14.9
+     2   |    0.74   |      40.8   |      37.3   |      293.5   |   135.8   |   15.7
+     3   |    1.22   |      50.6   |      34.8   |      186.1   |    12.4   |   14.2
+     4   |    1.23   |      45.9   |      37.2   |      192.8   |    11.7   |   15.8
+     5   |    0.95   |      47.5   |      35.8   |      251.6   |    17.4   |   15.2
+     6   |    7.78   |      38.0   |      34.4   |      114.0   |    11.3   |   18.6
+     7   |    2.06   |      40.7   |      21.5   |      103.5   |    13.1   |   14.5
+     8   |    1.84   |      36.7   |      17.0   |      127.1   |     9.1   |   13.5
+     9   |    2.00   |      31.4   |      20.8   |      122.1   |    11.0   |   14.4
+    10   |    0.59   |      38.2   |      20.6   |      171.2   |    11.6   |   15.1
+    11   |    0.52   |      37.5   |      23.5   |      111.1   |    11.5   |   15.1
+    12   |    1.39   |      33.8   |      15.9   |      121.3   |    11.4   |   13.4
+    13   |    0.86   |      34.8   |      17.9   |      122.8   |    11.3   |   11.2
+    14   |    0.55   |      53.9   |      21.0   |      144.9   |    10.8   |   14.3
+    15   |    0.73   |     323.3   |      19.4   |       90.1   |    10.8   |   14.6
+    16   |    0.74   |      34.0   |      37.0   |      137.8   |    11.5   |   15.6
+    17   |    0.45   |      39.2   |      21.1   |      180.6   |    11.7   |   15.4
+    18   |    1.04   |      40.7   |      18.2   |      112.6   |    15.9   |   10.1
+    19   |    0.51   |      38.6   |      39.1   |      135.2   |    10.2   |   15.6
+    20   |    0.46   |      43.6   |      37.6   |      144.0   |     7.5   |   16.0
+
+  Averages (20 clients):
+    Total session: 1.33 ms  |  Pure crypto: 0.28 ms
+    ML-KEM keygen: 55.3 us  |  ML-KEM decaps: 26.6 us
+    ML-DSA sign:   154.0 us  |  Transcript hash: 25.1 us
+    SHAKE256 KDF:  14.7 us
+
+--- PHASE 2: SYMMETRIC AEAD (ChaCha20-Poly1305) ---------------
+
+  SERVER -> CLIENT (direct scalar, key_s2c, monotonic nonce):
+    Operations:  120
+    Total time:  0.18 ms
+    Per-message: 1.51 us
+
+  CLIENT -> SERVER (SIMD batch, key_c2s, monotonic nonce):
+    Batch size:       4 (AVX2 4-lane)
+    Total batches:    500
+    Total messages:   2000
+
+    AVX2 SIMD:        2.63 us/batch  (0.66 us/msg)
+    (Scalar baseline measured separately; run 'make validate'
+     for per-size microbenchmark numbers in test_simd.)
+
+--- MESSAGE STATISTICS -----------------------------------------
+  [1] Client1       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [2] Client2       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [3] Client3       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [4] Client4       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [5] Client5       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [6] Client6       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [7] Client7       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [8] Client8       sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [9] Client9       sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [10] Client10      sent=6  recv=100  (0.1 KB / 1.9 KB)
+  [11] Client11      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [12] Client12      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [13] Client13      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [14] Client14      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [15] Client15      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [16] Client16      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [17] Client17      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [18] Client18      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [19] Client19      sent=6  recv=100  (0.1 KB / 2.0 KB)
+  [20] Client20      sent=6  recv=100  (0.1 KB / 2.0 KB)
+
+--- ADAPTIVE BATCH SCHEDULER -----------------------------------
+  Total messages:        2000
+  Full AVX2 batches:     500 (100.0% of messages)
+  Scalar fallback:       0 (0.0% of messages)
+  Avg AVX2 per-batch:    2.63 us  (0.66 us/msg)
+  Note: scheduler routes partial-batch work to scalar to
+        avoid the 0.83x under-batched regime.
+
+--- SECURITY PROPERTIES ----------------------------------------
+  [x] Transcript-bound signature: Sign(H(pk_sig || pk_kem || ns))
+  [x] Transcript-bound KDF: SHAKE256("PQ-AKE" || ss || transcript)
+  [x] Directional keys: key_s2c != key_c2s (reflection-safe)
+  [x] Monotonic nonces: seq counter per direction (replay-safe)
+  [x] Ciphertext length validation
+  [x] Secret zeroization on cleanup
+
+--- IMPLEMENTATION NOTES ---------------------------------------
+  [x] ML-KEM-768: liboqs with AVX2-optimized NTT/poly ops
+  [x] ML-DSA-65:  liboqs with AVX2 internal optimization
+  [x] ChaCha20:   Real AVX2 4-lane parallel keystream gen
+  [x] Poly1305:   Scalar (per-stream)
+  [x] Batching:   Applied to symmetric AEAD only (not PQ)
+  [x] Speedup:    Measured on identical data, scalar vs AVX2
+================================================================
+

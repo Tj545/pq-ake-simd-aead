@@ -1,0 +1,273 @@
+[12:15:15] Server started (PID 371488)
+[12:15:17] Launching 100 clients...
+[12:15:17] All 100 clients launched, waiting...
+[12:15:42] Sending 10 broadcasts...
+[12:15:47] Sending quit via FIFO...
+[12:15:48] Waiting for server to exit...
+[12:15:54] Server still alive, sending SIGINT...
+
+===================================================
+RESULTS FOR N=100 CLIENTS
+===================================================
+  CRYPTOGRAPHIC PERFORMANCE REPORT
+  (Pure crypto execution time — excludes I/O, threading, alloc)
+================================================================
+
+--- PHASE 1: PER-CLIENT AUTHENTICATION (SERVER SIDE) -----------
+  Protocol: ML-KEM-768 + ML-DSA-65 + SHAKE256
+  Security: Transcript-bound sig + directional keys + session nonce
+  Note: ML-KEM uses liboqs AVX2-optimized NTT internally
+  Clients authenticated: 100
+
+  Client | Total(ms) | KEM-Gen(us) | KEM-Dec(us) | DSA-Sign(us) | THash(us) | KDF(us)
+  -------|-----------|-------------|-------------|--------------|-----------|--------
+     1   |    0.66   |      80.3   |      23.9   |      108.8   |   132.3   |   14.8
+     2   |    0.68   |      36.9   |      21.0   |       79.1   |    11.6   |   13.0
+     3   |    0.55   |      46.3   |      37.5   |       82.5   |    12.3   |   15.7
+     4   |    1.21   |      69.8   |      38.2   |      404.0   |    12.9   |   16.5
+     5   |    0.56   |      41.1   |      22.2   |      149.3   |    11.9   |   14.9
+     6   |    0.52   |      42.5   |      19.3   |       98.0   |    14.3   |   12.7
+     7   |    0.57   |      40.7   |      19.6   |      154.1   |    11.4   |   14.1
+     8   |    0.49   |      38.5   |      19.5   |       78.4   |    11.3   |   14.4
+     9   |    0.48   |      39.1   |      18.5   |      102.1   |    11.8   |   14.6
+    10   |    0.66   |      38.1   |      14.5   |      323.9   |    16.0   |    8.0
+    11   |    0.40   |      39.0   |      20.2   |      130.5   |    11.3   |   14.6
+    12   |    0.51   |      42.5   |      21.4   |       94.7   |    11.9   |   14.9
+    13   |    0.44   |      38.0   |      16.0   |      108.3   |    11.4   |    9.2
+    14   |    0.34   |      24.7   |      20.0   |       65.4   |     6.2   |   14.1
+    15   |    0.43   |      34.1   |      19.5   |      195.6   |    12.0   |   13.2
+    16   |    1.80   |      41.6   |      22.7   |       86.9   |    10.8   |   16.7
+    17   |    0.68   |      38.9   |      21.4   |      232.1   |    12.2   |   15.0
+    18   |    2.07   |      29.7   |      21.6   |      114.7   |    10.9   |   15.3
+    19   |    0.78   |      35.5   |      40.2   |      128.0   |    11.5   |   16.6
+    20   |    1.23   |      39.0   |      16.5   |      339.3   |    10.5   |    9.8
+    21   |    0.56   |      42.4   |      19.7   |      258.6   |    11.9   |   14.7
+    22   |    1.63   |      53.9   |      43.1   |      134.3   |    13.2   |   16.6
+    23   |    0.65   |      39.2   |      21.9   |      125.5   |    10.7   |   15.3
+    24   |    0.56   |      38.6   |      38.5   |      140.1   |    12.9   |   15.9
+    25   |    2.16   |      37.6   |      21.8   |      139.2   |    11.7   |   16.4
+    26   |    0.50   |      39.2   |      21.0   |      236.1   |    10.8   |   16.4
+    27   |    0.52   |      31.8   |      21.7   |       91.5   |     9.9   |   15.7
+    28   |    0.79   |     444.6   |      35.4   |       81.4   |    12.0   |   15.1
+    29   |    0.67   |      43.1   |      38.1   |       90.0   |    11.2   |   16.4
+    30   |    0.55   |      42.4   |      37.1   |      132.5   |    11.1   |   15.5
+    31   |    1.34   |      39.6   |      24.6   |      181.6   |    10.6   |   16.6
+    32   |    2.09   |      63.9   |      38.7   |      117.2   |     7.9   |   16.5
+    33   |    1.01   |      52.1   |      40.3   |      365.7   |    12.5   |   16.5
+    34   |    0.97   |      50.0   |      46.1   |      255.9   |    12.3   |   14.2
+    35   |    3.07   |      46.7   |      22.8   |      134.3   |    12.7   |   17.3
+    36   |    2.50   |      39.4   |      25.1   |       98.9   |    11.5   |   14.6
+    37   |    1.64   |      44.8   |      21.6   |       85.5   |    11.4   |   13.8
+    38   |    0.63   |      36.2   |      22.5   |      146.9   |    10.7   |   13.5
+    39   |    1.68   |      49.5   |      22.9   |       82.2   |    11.4   |   15.9
+    40   |   12.17   |      37.7   |      24.5   |       76.0   |    10.8   |   16.3
+    41   |   12.03   |      27.5   |      44.6   |      115.7   |     9.0   |   11.6
+    42   |    0.42   |      36.1   |      20.7   |      154.7   |    11.0   |   14.8
+    43   |    0.54   |      37.7   |      19.3   |      146.2   |    10.5   |   13.2
+    44   |    0.59   |      39.4   |      19.6   |      143.3   |    11.3   |   15.2
+    45   |    8.30   |      37.7   |      22.4   |     3777.1   |     9.2   |   15.5
+    46   |   15.77   |      35.4   |      22.2   |      116.0   |    10.4   |   14.4
+    47   |    0.72   |      52.8   |      22.0   |      171.3   |    29.6   |   15.4
+    48   |    0.39   |      37.4   |      39.0   |      113.4   |    11.7   |   16.3
+    49   |    8.19   |      42.7   |      24.9   |      288.5   |    16.1   |   19.1
+    50   |    7.03   |      42.8   |      20.8   |      154.7   |    16.1   |   15.1
+    51   |    1.71   |      42.2   |      20.6   |      117.6   |    10.9   |   15.2
+    52   |    0.45   |      34.8   |      25.3   |      104.0   |    10.9   |   15.1
+    53   |    0.37   |      36.3   |      21.6   |      106.0   |    10.7   |   15.8
+    54   |    5.41   |      44.3   |      18.5   |       86.7   |    10.2   |   13.3
+    55   |    1.05   |      37.9   |      22.8   |       80.4   |    11.5   |   13.4
+    56   |    0.53   |      53.4   |      27.4   |      152.8   |    11.6   |   13.6
+    57   |    0.44   |      39.7   |      16.6   |       93.2   |    11.7   |    9.5
+    58   |    3.05   |      38.2   |      17.5   |      108.5   |    10.3   |   12.4
+    59   |    2.36   |      37.9   |      21.4   |       91.2   |    10.2   |   14.6
+    60   |    2.45   |     560.0   |      39.1   |      361.3   |    13.7   |   16.3
+    61   |    0.51   |      41.9   |      24.7   |       80.3   |    12.0   |   16.1
+    62   |    0.87   |      54.2   |      36.6   |      412.6   |    13.4   |   14.7
+    63   |    0.36   |      38.4   |      34.7   |      117.6   |    11.3   |   14.2
+    64   |    0.94   |      37.9   |      22.6   |      477.1   |    12.0   |   19.1
+    65   |    0.92   |      43.9   |      15.4   |      116.4   |    12.6   |   10.3
+    66   |    2.49   |      37.8   |      21.8   |      109.8   |    10.7   |   12.2
+    67   |    0.49   |      42.5   |      20.1   |       82.9   |    11.9   |   16.1
+    68   |    0.49   |      47.5   |      21.0   |       89.4   |    10.3   |   15.1
+    69   |    1.72   |      33.8   |      20.8   |      122.7   |    11.1   |   13.8
+    70   |    1.78   |      39.1   |      22.2   |       97.3   |    11.5   |   15.1
+    71   |    1.03   |      43.8   |      16.5   |      216.4   |    12.4   |   10.1
+    72   |    1.70   |    1231.5   |      20.1   |       89.6   |    11.8   |   14.3
+    73   |    1.19   |     708.4   |      20.0   |       88.3   |    13.8   |    9.1
+    74   |    0.74   |      57.8   |      38.0   |      249.4   |    12.8   |   16.0
+    75   |    0.62   |      39.1   |      36.6   |       83.0   |    10.2   |   15.1
+    76   |    0.80   |      35.5   |      16.8   |       78.3   |     9.8   |   10.0
+    77   |    0.95   |      38.9   |      21.0   |      285.2   |    11.3   |   16.3
+    78   |    0.48   |      39.4   |      21.1   |       91.0   |    10.6   |   14.8
+    79   |    0.98   |     560.9   |      15.3   |       87.3   |     7.0   |    8.9
+    80   |    1.17   |      30.7   |      22.2   |       90.6   |     8.3   |   15.9
+    81   |    0.99   |      29.9   |      27.5   |      113.5   |     7.1   |   15.4
+    82   |    0.43   |     123.5   |      23.1   |      105.4   |     7.2   |   16.4
+    83   |    0.69   |      28.5   |      20.4   |      465.7   |     6.7   |   10.6
+    84   |    0.90   |      63.4   |      37.2   |      252.1   |    13.2   |   15.9
+    85   |    0.46   |      29.1   |      14.6   |      141.3   |    10.5   |    8.5
+    86   |    0.36   |      27.4   |      17.8   |      142.9   |     6.8   |   12.2
+    87   |    0.55   |      49.3   |      21.1   |      149.0   |     7.1   |   13.8
+    88   |    0.70   |      52.5   |      37.1   |      171.2   |    12.6   |   16.3
+    89   |    0.49   |      42.5   |      22.6   |       94.1   |    10.6   |   14.2
+    90   |    1.28   |     101.6   |      35.3   |      834.3   |    14.0   |   15.4
+    91   |    0.41   |      40.7   |      17.2   |       86.1   |    11.6   |    9.3
+    92   |    1.17   |      64.0   |      37.5   |      480.3   |    13.3   |   15.7
+    93   |    0.50   |      38.0   |      16.8   |       60.0   |     7.1   |    9.8
+    94   |    0.45   |      57.0   |      20.6   |       66.8   |    11.2   |   15.1
+    95   |    1.09   |      38.4   |      16.7   |      130.5   |     7.2   |   10.0
+    96   |    0.48   |      57.2   |      12.8   |      132.2   |    12.0   |    7.7
+    97   |    0.42   |      32.8   |      13.5   |      109.3   |     7.7   |    7.8
+    98   |    0.40   |      29.5   |      15.1   |       96.6   |     7.1   |    8.9
+    99   |    0.28   |      29.1   |      13.5   |       56.9   |     7.0   |    7.7
+    100   |    0.41   |      54.1   |      34.7   |      135.9   |    12.7   |   14.4
+
+  Averages (100 clients):
+    Total session: 1.55 ms  |  Pure crypto: 0.32 ms
+    ML-KEM keygen: 76.1 us  |  ML-KEM decaps: 24.5 us
+    ML-DSA sign:   194.2 us  |  Transcript hash: 12.5 us
+    SHAKE256 KDF:  14.0 us
+
+--- PHASE 2: SYMMETRIC AEAD (ChaCha20-Poly1305) ---------------
+
+  SERVER -> CLIENT (direct scalar, key_s2c, monotonic nonce):
+    Operations:  150
+    Total time:  0.22 ms
+    Per-message: 1.50 us
+
+  CLIENT -> SERVER (SIMD batch, key_c2s, monotonic nonce):
+    Batch size:       4 (AVX2 4-lane)
+    Total batches:    2142
+    Total messages:   8568
+
+    AVX2 SIMD:        2.53 us/batch  (0.63 us/msg)
+    (Scalar baseline measured separately; run 'make validate'
+     for per-size microbenchmark numbers in test_simd.)
+
+--- MESSAGE STATISTICS -----------------------------------------
+  [1] Client1       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [2] Client2       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [3] Client3       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [4] Client4       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [5] Client5       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [6] Client6       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [7] Client7       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [8] Client8       sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [9] Client9       sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [10] Client10      sent=0  recv=100  (0.0 KB / 1.9 KB)
+  [11] Client11      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [12] Client12      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [13] Client13      sent=0  recv=2  (0.0 KB / 0.0 KB)
+  [14] Client14      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [15] Client15      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [16] Client16      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [17] Client17      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [18] Client18      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [19] Client19      sent=0  recv=2  (0.0 KB / 0.0 KB)
+  [20] Client20      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [21] Client21      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [22] Client22      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [23] Client23      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [24] Client24      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [25] Client25      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [26] Client26      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [27] Client27      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [28] Client28      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [29] Client29      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [30] Client30      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [31] Client31      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [32] Client32      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [33] Client33      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [34] Client34      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [35] Client35      sent=0  recv=1  (0.0 KB / 0.0 KB)
+  [36] Client36      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [37] Client37      sent=0  recv=2  (0.0 KB / 0.0 KB)
+  [38] Client38      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [39] Client39      sent=0  recv=1  (0.0 KB / 0.0 KB)
+  [40] Client40      sent=0  recv=2  (0.0 KB / 0.0 KB)
+  [41] Client41      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [42] Client42      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [43] Client43      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [44] Client44      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [45] Client45      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [46] Client46      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [47] Client47      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [48] Client48      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [49] Client49      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [50] Client50      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [51] Client51      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [52] Client52      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [53] Client53      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [54] Client54      sent=0  recv=58  (0.0 KB / 1.2 KB)
+  [55] Client55      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [56] Client56      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [57] Client57      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [58] Client58      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [59] Client59      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [60] Client60      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [61] Client61      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [62] Client62      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [63] Client63      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [64] Client64      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [65] Client65      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [66] Client66      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [67] Client67      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [68] Client68      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [69] Client69      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [70] Client70      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [71] Client71      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [72] Client72      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [73] Client73      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [74] Client74      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [75] Client75      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [76] Client76      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [77] Client77      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [78] Client78      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [79] Client79      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [80] Client80      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [81] Client81      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [82] Client82      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [83] Client83      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [84] Client84      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [85] Client85      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [86] Client86      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [87] Client87      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [88] Client88      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [89] Client89      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [90] Client90      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [91] Client91      sent=0  recv=0  (0.0 KB / 0.0 KB)
+  [92] Client92      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [93] Client93      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [94] Client94      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [95] Client95      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [96] Client96      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [97] Client97      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [98] Client98      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [99] Client99      sent=0  recv=100  (0.0 KB / 2.0 KB)
+  [100] Client100     sent=0  recv=100  (0.0 KB / 2.0 KB)
+
+--- ADAPTIVE BATCH SCHEDULER -----------------------------------
+  Total messages:        8568
+  Full AVX2 batches:     2142 (100.0% of messages)
+  Scalar fallback:       0 (0.0% of messages)
+  Avg AVX2 per-batch:    2.53 us  (0.63 us/msg)
+  Note: scheduler routes partial-batch work to scalar to
+        avoid the 0.83x under-batched regime.
+
+--- SECURITY PROPERTIES ----------------------------------------
+  [x] Transcript-bound signature: Sign(H(pk_sig || pk_kem || ns))
+  [x] Transcript-bound KDF: SHAKE256("PQ-AKE" || ss || transcript)
+  [x] Directional keys: key_s2c != key_c2s (reflection-safe)
+  [x] Monotonic nonces: seq counter per direction (replay-safe)
+  [x] Ciphertext length validation
+  [x] Secret zeroization on cleanup
+
+--- IMPLEMENTATION NOTES ---------------------------------------
+  [x] ML-KEM-768: liboqs with AVX2-optimized NTT/poly ops
+  [x] ML-DSA-65:  liboqs with AVX2 internal optimization
+  [x] ChaCha20:   Real AVX2 4-lane parallel keystream gen
+  [x] Poly1305:   Scalar (per-stream)
+  [x] Batching:   Applied to symmetric AEAD only (not PQ)
+  [x] Speedup:    Measured on identical data, scalar vs AVX2
+================================================================
+

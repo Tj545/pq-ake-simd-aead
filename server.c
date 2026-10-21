@@ -49,7 +49,7 @@
 
 /* ── Configuration ─────────────────────────────────────────────── */
 #define PORT                9000
-#define MAX_CLIENTS         20
+#define MAX_CLIENTS         256
 #define SIMD_BATCH_SIZE     4       /* 4-lane AVX2 */
 #define KEY_LEN             32
 #define NONCE_LEN           12

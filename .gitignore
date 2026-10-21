@@ -21,3 +21,4 @@ check/
 *.o
 *.swp
 .DS_Store
+bench_aes_gcm

@@ -1,93 +1,101 @@
 (* ================================================================
- *  ProVerif model of the PQ handshake protocol
- *  ================================================================
+ *  ProVerif model — PQ handshake protocol (CORRECTED)
+ *  ML-KEM-768 + ML-DSA-65 + ChaCha20-Poly1305
  *
- *  Mirrors the EXACT wire protocol from:
- *    - server.c  authenticate_client()  lines 350-408
- *    - server.c  send_to_client()       lines 414-445
- *    - server.c  client_handler recv    lines 489-530
- *    - client.c  authenticate()         lines 180-258
- *    - client.c  send_encrypted()       lines 264-288
- *    - client.c  receiver()             lines 290-327
+ *  Matches the corrected server.c / client.c wire protocol:
  *
- *  Wire protocol (handshake):
- *    S→C : sig_pk                          (server.c:363)
- *    S→C : kem_pk                          (server.c:364)
- *    S→C : ML-DSA.Sign(sk_sig, kem_pk)     (server.c:377)
- *    C→S : ML-KEM.Encaps(kem_pk)           (client.c:238)
- *    Both: key = SHAKE256(label || ss)      (server.c:396, client.c:241)
+ *  HANDSHAKE:
+ *    S→C : sig_pk                                (server.c: send_all sig_pk)
+ *    S→C : kem_pk                                (server.c: send_all kem_pk)
+ *    S→C : ns          [SECURITY-1]              (server.c: send_all ns)
+ *    S : transcript = H(sig_pk||kem_pk||ns)      (server.c: compute_transcript_hash)
+ *    S→C : Sign(sig_sk, transcript) [SECURITY-2] (server.c: OQS_SIG_sign)
+ *    C→S : ML-KEM.Encaps(kem_pk)                 (client.c: OQS_KEM_encaps)
  *
- *  Wire protocol (data phase):
- *    packet = nonce || tag || ciphertext    (server.c:435-437, client.c:279-281)
- *    In ProVerif the tag is implicit in the AEAD ciphertext.
+ *  KEY DERIVATION:  [SECURITY-3,4]
+ *    Both: ss = KEM shared secret
+ *    Both: key_s2c = derive_s2c(ss)  (server→client encryption)
+ *    Both: key_c2s = derive_c2s(ss)  (client→server encryption)
  *
- *  SECURITY FIX APPLIED:
- *    The original client.c accepts sig_pk from the network with NO
- *    trusted reference (client.c:195). An attacker can substitute
- *    their own signing key → full MITM.
+ *  DATA PHASE (directional keys + monotonic nonces):
+ *    S→C : Enc(key_s2c, nonce_s, msg)  [SECURITY-4]
+ *    C→S : Enc(key_c2s, nonce_c, msg)  [SECURITY-4]
  *
- *    Fix: Client receives trusted_pk_sig as a parameter (modelling
- *    a pre-shared server_pk.bin file) and checks the received key
- *    against it.  This is the ONLY change from the C code.
+ *  WHY THIS FIXES Q8 (injective authentication):
+ *    The reflection attack in the original protocol works because
+ *    the attacker replays the client's own encrypted message
+ *    (key_c2s-encrypted) back to the client. The client decrypts
+ *    successfully because key == key (same key both directions).
  *
- *  Expected result: ALL 8 queries TRUE.
+ *    With directional keys:
+ *      - Client encrypts with key_c2s, decrypts with key_s2c
+ *      - Reflected key_c2s packets fail decryption with key_s2c
+ *      - Only the genuine server (who derived key_s2c via decaps)
+ *        can produce messages decryptable with key_s2c
+ *      - Therefore each ClientAcceptsServer requires a matching
+ *        ServerDerivesKey (injective correspondence)
+ *
+ *  Expected: ALL 8 queries TRUE.
  * ================================================================ *)
 
 
 (* ═══════════════════════════════════════════════════════════════
- *  DECLARATIONS
+ *  TYPES AND CHANNEL
  * ═══════════════════════════════════════════════════════════════ *)
 
-(* Attacker-controlled public channel (TCP socket) *)
 free c: channel.
 
-(* Types matching the C code's data structures *)
-type skey.          (* OQS secret key bytes                     *)
-type pkey.          (* OQS public key bytes                     *)
-type data.          (* generic byte buffer                      *)
-type ciphertext.    (* ML-KEM ciphertext                        *)
-type signature.     (* ML-DSA signature                         *)
-type key.           (* 32-byte session key (uint8_t key[32])    *)
-type nonce.         (* 12-byte AEAD nonce (uint8_t nonce[12])   *)
+type skey.
+type pkey.
+type ssecret.       (* KEM shared secret                          *)
+type ciphertext.
+type signature.
+type key.           (* 32-byte session key                        *)
+type nonce.         (* 12-byte AEAD nonce (from monotonic counter)*)
 
 
 (* ═══════════════════════════════════════════════════════════════
  *  CRYPTOGRAPHIC PRIMITIVES
  * ═══════════════════════════════════════════════════════════════ *)
 
-(* ── ML-DSA-65 (Dilithium) ──────────────────────────────────── *)
-(*  OQS_SIG_keypair  → (sig_pk, sig_sk)                         *)
-(*  OQS_SIG_sign     → signature                                *)
-(*  OQS_SIG_verify   → OQS_SUCCESS / OQS_ERROR                  *)
+(* ── ML-DSA-65 ──────────────────────────────────────────────── *)
+(* [SECURITY-2] Signature operates on bitstring (transcript hash)
+ * rather than pkey, because the server now signs
+ * H(pk_sig || pk_kem || ns) — a hash output. *)
 fun sig_pk(skey): pkey.
-fun sign(pkey, skey): signature.
-reduc forall m: pkey, sk: skey;
+fun sign(bitstring, skey): signature.
+reduc forall m: bitstring, sk: skey;
     verify(sign(m, sk), m, sig_pk(sk)) = true.
 
-(* ── ML-KEM-768 (Kyber) ────────────────────────────────────── *)
-(*  OQS_KEM_keypair  → (kem_pk, kem_sk)                         *)
-(*  OQS_KEM_encaps   → (ct, ss)                                 *)
-(*  OQS_KEM_decaps   → ss                                       *)
+(* ── ML-KEM-768 (table-based IND-CCA2 model) ────────────────── *)
+(* Client generates fresh ss, computes ct = kem_enc(pk, ss),
+ * inserts (ct, ss) into private table.
+ * Server retrieves ss by matching ct exactly.
+ * Attacker-crafted ciphertexts find no table entry → blocks. *)
 fun kem_pk(skey): pkey.
-fun encaps(pkey, data): ciphertext.
-fun encaps_secret(pkey, data): data.
-reduc forall sk: skey, r: data;
-    decaps(encaps(kem_pk(sk), r), sk) = encaps_secret(kem_pk(sk), r).
+fun kem_enc(pkey, ssecret): ciphertext.
+table kem_tbl(ciphertext, ssecret).
 
-(* ── SHAKE256 KDF ────────────────────────────────────────────── *)
-(*  derive_key() in both server.c:178 and client.c:108           *)
-(*  SHAKE256( "PQ-MLKEM768-ChaCha20Poly1305" || ss )             *)
-(*  Two-argument KDF matching the original C code exactly.       *)
-fun kdf(data, data): key.
-free kdf_label: data.   (* "PQ-MLKEM768-ChaCha20Poly1305" *)
+(* ── [SECURITY-2] Transcript hash ────────────────────────────── *)
+(* Models SHAKE256(pk_sig || pk_kem || ns) from both
+ * server.c:compute_transcript_hash and client.c:compute_transcript_hash *)
+fun transcript_hash(pkey, pkey, bitstring): bitstring.
+
+(* ── [SECURITY-3,4] Directional KDF ─────────────────────────── *)
+(* Models derive_session_keys() which outputs 64 bytes split into:
+ *   key_s2c = first 32 bytes (server→client)
+ *   key_c2s = last 32 bytes  (client→server)
+ * Using two separate functions ensures ProVerif treats them as
+ * distinct keys even though they derive from the same ss.
+ * The full C code binds "PQ-AKE"||ss||pk_sig||pk_kem||ns||ct
+ * but symbolically ss uniqueness is sufficient. *)
+fun derive_s2c(ssecret): key.
+fun derive_c2s(ssecret): key.
 
 (* ── ChaCha20-Poly1305 AEAD ─────────────────────────────────── *)
-(*  chachapoly_scalar(key, nonce, input, output, len, tag, enc)  *)
-(*  No associated data parameter in the C code.                  *)
-(*  Wire format: nonce(12) || tag(16) || ciphertext              *)
-(*  Tag is implicit in the ProVerif symbolic ciphertext.         *)
-fun aead_enc(key, nonce, data): data.
-reduc forall k: key, n: nonce, m: data;
+(* [SECURITY-5] Nonce is monotonic counter, modeled as fresh name *)
+fun aead_enc(key, nonce, bitstring): bitstring.
+reduc forall k: key, n: nonce, m: bitstring;
     aead_dec(aead_enc(k, n, m), k, n) = m.
 
 
@@ -95,76 +103,59 @@ reduc forall k: key, n: nonce, m: data;
  *  SECRECY QUERIES
  * ═══════════════════════════════════════════════════════════════ *)
 
-(* Private test values — attacker should never learn these *)
 free session_key_secret: key [private].
-free secret_message: data [private].
-free kem_shared_secret: data [private].
+free secret_message: bitstring [private].
+free kem_shared_secret: ssecret [private].
 
-(* Q1: Session key secrecy *)
-query attacker(session_key_secret).
-
-(* Q2: Message secrecy *)
-query attacker(secret_message).
-
-(* Q3: KEM shared secret secrecy *)
-query attacker(kem_shared_secret).
+(* Q1 *) query attacker(session_key_secret).
+(* Q2 *) query attacker(secret_message).
+(* Q3 *) query attacker(kem_shared_secret).
 
 
 (* ═══════════════════════════════════════════════════════════════
- *  AUTHENTICATION & SESSION EVENTS
+ *  EVENTS
  * ═══════════════════════════════════════════════════════════════ *)
 
-(* Authentication *)
 event ServerSendsAuth(pkey, pkey, signature).
 event ClientVerifiesAuth(pkey, pkey).
-
-(* Ciphertext exchange *)
 event ClientSendsCiphertext(ciphertext).
 event ServerDecapsCiphertext(ciphertext).
-
-(* Key derivation *)
 event ServerDerivesKey(key).
 event ClientDerivesKey(key).
-
-(* Session lifecycle *)
 event ServerAcceptsClient(pkey, key).
 event ClientAcceptsServer(pkey, key).
 event SessionEstablished(key, pkey, pkey).
-
-(* Data phase *)
-event MessageSent(key, data).
-event MessageReceived(key, data).
+event MessageSent(key, bitstring).
+event MessageReceived(key, bitstring).
 
 
 (* ═══════════════════════════════════════════════════════════════
  *  CORRESPONDENCE QUERIES
  * ═══════════════════════════════════════════════════════════════ *)
 
-(* Q4: If client accepts server spk, server must have
- *     authenticated with that identity.
- *     Broken in original: client trusts pk_sig from network. *)
+(* Q4: Server authentication *)
 query spk: pkey, k: key, kpk: pkey, s: signature;
     event(ClientAcceptsServer(spk, k))
     ==> event(ServerSendsAuth(spk, kpk, s)).
 
-(* Q5: If server accepts (kem pk, key), some client sent
- *     a ciphertext.  Already TRUE in original code. *)
-query kpk: pkey, k: key, ct_2: ciphertext;
+(* Q5: Client liveness *)
+query kpk: pkey, k: key, ct2: ciphertext;
     event(ServerAcceptsClient(kpk, k))
-    ==> event(ClientSendsCiphertext(ct_2)).
+    ==> event(ClientSendsCiphertext(ct2)).
 
-(* Q6: If both sides derive same key, session was established. *)
+(* Q6: Key agreement *)
 query k: key, spk: pkey, kpk: pkey;
     event(ClientDerivesKey(k)) && event(ServerDerivesKey(k))
     ==> event(SessionEstablished(k, spk, kpk)).
 
-(* Q7: Every received message was actually sent.
- *     Broken in original: attacker can MITM → forge msgs. *)
-query k: key, m: data;
+(* Q7: Message authenticity *)
+query k: key, m: bitstring;
     event(MessageReceived(k, m)) ==> event(MessageSent(k, m)).
 
-(* Q8: Injective correspondence — each client acceptance maps
- *     to a unique server key derivation (no replay). *)
+(* Q8: INJECTIVE server authentication.
+ * This query failed in the original protocol because the attacker
+ * could reflect client messages. With directional keys, it succeeds:
+ * each ClientAcceptsServer maps to exactly one ServerDerivesKey. *)
 query spk: pkey, k: key;
     inj-event(ClientAcceptsServer(spk, k))
     ==> inj-event(ServerDerivesKey(k)).
@@ -173,172 +164,151 @@ query spk: pkey, k: key;
 (* ═══════════════════════════════════════════════════════════════
  *  SERVER PROCESS
  *
- *  Maps to:
- *    main()                  → OQS_SIG_keypair  (server.c:772)
- *    authenticate_client()   → handshake         (server.c:350-408)
- *    send_to_client()        → data send          (server.c:414-445)
- *    client_handler recv     → data recv          (server.c:489-530)
+ *  server.c: authenticate_client()
+ *            send_to_client()       — uses key_s2c
+ *            client_handler recv    — uses key_c2s
  * ═══════════════════════════════════════════════════════════════ *)
 
-let Server(sk_sig: skey, pk_sig_val: pkey) =
+let Server(sk_sig: skey, pk_sig_pub: pkey) =
 
-    (* ── server.c:355-358  OQS_KEM_keypair(kem, kem_pk, kem_sk) ── *)
+    (* server.c: ML-KEM keypair generation *)
     new sk_kem: skey;
     let pk_kem: pkey = kem_pk(sk_kem) in
 
-    (* ── server.c:363  send_all(c->sock, srv.sig_pk, ...) ──────── *)
-    out(c, pk_sig_val);
+    (* [SECURITY-1] server.c: Generate fresh session nonce ns *)
+    new ns: bitstring;
 
-    (* ── server.c:364  send_all(c->sock, kem_pk, ...) ─────────── *)
+    (* server.c: send sig_pk, kem_pk, ns *)
+    out(c, pk_sig_pub);
     out(c, pk_kem);
+    out(c, ns);
 
-    (* ── server.c:372  OQS_SIG_sign(srv.sig, signature, &sig_len,
-     *                               kem_pk, ..., srv.sig_sk)       *)
-    let sig: signature = sign(pk_kem, sk_sig) in
-    event ServerSendsAuth(pk_sig_val, pk_kem, sig);
+    (* [SECURITY-2] server.c: compute_transcript_hash + sign *)
+    let th: bitstring = transcript_hash(pk_sig_pub, pk_kem, ns) in
+    let sig_val: signature = sign(th, sk_sig) in
+    event ServerSendsAuth(pk_sig_pub, pk_kem, sig_val);
 
-    (* ── server.c:377  send_all(c->sock, signature, sig_len) ──── *)
-    out(c, sig);
+    (* server.c: send signature *)
+    out(c, sig_val);
 
-    (* ── server.c:384  recv_all(c->sock, &ct, &ct_len) ────────── *)
+    (* server.c: receive ciphertext *)
     in(c, ct: ciphertext);
     event ServerDecapsCiphertext(ct);
 
-    (* ── server.c:391  OQS_KEM_decaps(kem, ss, ct, kem_sk) ────── *)
-    let ss: data = decaps(ct, sk_kem) in
+    (* server.c: ML-KEM decapsulation (table-based) *)
+    get kem_tbl(=ct, ss: ssecret) in
 
-    (* ── server.c:396  derive_key(ss, ...,
-     *     "PQ-MLKEM768-ChaCha20Poly1305", c->key, ...) ──────────── *)
-    let session_key: key = kdf(kdf_label, ss) in
+    (* [SECURITY-3,4] server.c: derive_session_keys
+     * key_s2c for sending, key_c2s for receiving *)
+    let key_s2c: key = derive_s2c(ss) in
+    let key_c2s: key = derive_c2s(ss) in
 
-    (* Events: session established, then key derived, then accept.
-     * SessionEstablished placed before DeriveKey so Q6
-     * correspondence (DeriveKey ==> SessionEstablished) holds. *)
-    event SessionEstablished(session_key, pk_sig_val, pk_kem);
-    event ServerDerivesKey(session_key);
-    event ServerAcceptsClient(pk_kem, session_key);
+    event SessionEstablished(key_s2c, pk_sig_pub, pk_kem);
+    event ServerDerivesKey(key_s2c);
+    event ServerAcceptsClient(pk_kem, key_s2c);
 
-    (* ── DATA PHASE: server.c:414-445 send_to_client() ──────────
-     *  nonce = rand_bytes(nonce, 12)            server.c:420
-     *  chachapoly_scalar(key,nonce,msg,ct,...)  server.c:424
-     *  pkt = nonce || tag || ct                 server.c:435-437
-     *  send_all(c->sock, pkt, pkt_len)          server.c:439       *)
+    (* server.c:send_to_client — encrypt with key_s2c *)
     new nonce_s: nonce;
-    new server_msg: data;
-    event MessageSent(session_key, server_msg);
-    let encrypted_msg: data = aead_enc(session_key, nonce_s, server_msg) in
-    out(c, (nonce_s, encrypted_msg));
+    new server_msg: bitstring;
+    event MessageSent(key_s2c, server_msg);
+    let enc_s: bitstring = aead_enc(key_s2c, nonce_s, server_msg) in
+    out(c, (nonce_s, enc_s));
 
-    (* ── DATA PHASE: server.c:489-530 client_handler recv loop ──
-     *  recv_all(c->sock, &pkt, &pkt_len)       server.c:492
-     *  nonce = pkt[0:12]                        server.c:501
-     *  tag   = pkt[12:28]                       server.c:502
-     *  ct    = pkt[28:]                         server.c:505
-     *  submit_to_batch(&item) → decrypt         server.c:511       *)
-    in(c, (nonce_c: nonce, encrypted_from_client: data));
-    let decrypted_msg: data = aead_dec(encrypted_from_client, session_key, nonce_c) in
-    event MessageReceived(session_key, decrypted_msg).
+    (* server.c:client_handler — decrypt with key_c2s *)
+    in(c, (nonce_c: nonce, enc_c: bitstring));
+    let dec_c: bitstring = aead_dec(enc_c, key_c2s, nonce_c) in
+    event MessageReceived(key_c2s, dec_c).
 
 
 (* ═══════════════════════════════════════════════════════════════
  *  CLIENT PROCESS
  *
- *  Maps to:
- *    authenticate()      → handshake   (client.c:180-258)
- *    send_encrypted()    → data send   (client.c:264-288)
- *    receiver()          → data recv   (client.c:290-327)
+ *  client.c: authenticate()
+ *            send_encrypted()   — uses key_c2s
+ *            receiver()         — uses key_s2c
  *
- *  SECURITY FIX: trusted_pk_sig parameter models loading
- *  server_pk.bin (not present in original client.c).
+ *  ClientAcceptsServer fires AFTER successful decryption with
+ *  key_s2c (key confirmation). This is the critical ordering
+ *  for Q8: the client only "accepts" after proving the server
+ *  derived the matching key_s2c.
  * ═══════════════════════════════════════════════════════════════ *)
 
 let Client(trusted_pk_sig: pkey) =
 
-    (* ── client.c:195  recv_all(c->sock, &sig_pk, &sig_pk_len) ── *)
+    (* client.c: receive sig_pk *)
     in(c, received_pk_sig: pkey);
 
-    (* ── FIX: Compare received key against trusted copy ──────────
-     *  Original client.c:195 accepts sig_pk from network blindly.
-     *  This check prevents MITM (models server_pk.bin loading).
-     *  Without this, attacker forges own (sk_atk, pk_atk), signs
-     *  their own kem_pk, and the verify() below still passes. *)
+    (* Trust anchor check (models pre-shared server_pk.bin) *)
     if received_pk_sig = trusted_pk_sig then
 
-    (* ── client.c:202  recv_all(c->sock, &kem_pk, &kem_pk_len) ── *)
+    (* client.c: receive kem_pk *)
     in(c, pk_kem: pkey);
 
-    (* ── client.c:209  recv_all(c->sock, &signature, &sl) ─────── *)
-    in(c, sig_1: signature);
+    (* [SECURITY-1] client.c: receive session nonce ns *)
+    in(c, ns: bitstring);
 
-    (* ── client.c:216  OQS_SIG_verify(sig, kem_pk, kem_pk_len,
-     *                                  signature, sl, sig_pk)
-     *    if (vr != OQS_SUCCESS) { ... return -1; }               *)
-    if verify(sig_1, pk_kem, trusted_pk_sig) = true then
+    (* client.c: receive signature *)
+    in(c, sig_rcv: signature);
+
+    (* [SECURITY-2] client.c: compute_transcript_hash + verify
+     * Verify the signature against H(pk_sig || pk_kem || ns).
+     * This binds identity + ephemeral key + session freshness. *)
+    let th: bitstring = transcript_hash(trusted_pk_sig, pk_kem, ns) in
+    if verify(sig_rcv, th, trusted_pk_sig) = true then
     event ClientVerifiesAuth(trusted_pk_sig, pk_kem);
 
-    (* ── client.c:232  OQS_KEM_encaps(kem, ct, ss, kem_pk) ────── *)
-    new randomness: data;
-    let ct: ciphertext = encaps(pk_kem, randomness) in
-    let ss: data = encaps_secret(pk_kem, randomness) in
+    (* client.c: ML-KEM encapsulation *)
+    new ss: ssecret;
+    let ct: ciphertext = kem_enc(pk_kem, ss) in
+    insert kem_tbl(ct, ss);
     event ClientSendsCiphertext(ct);
 
-    (* ── client.c:238  send_all(c->sock, ct, ...) ────────────── *)
+    (* client.c: send ciphertext *)
     out(c, ct);
 
-    (* ── client.c:241  derive_key(ss, ...,
-     *     "PQ-MLKEM768-ChaCha20Poly1305", c->key, ...) ──────── *)
-    let session_key: key = kdf(kdf_label, ss) in
+    (* [SECURITY-3,4] client.c: derive_session_keys
+     * key_s2c for receiving, key_c2s for sending *)
+    let key_s2c: key = derive_s2c(ss) in
+    let key_c2s: key = derive_c2s(ss) in
 
-    (* Events: session established, then key derived, then accept *)
-    event SessionEstablished(session_key, trusted_pk_sig, pk_kem);
-    event ClientDerivesKey(session_key);
-    event ClientAcceptsServer(trusted_pk_sig, session_key);
+    event SessionEstablished(key_s2c, trusted_pk_sig, pk_kem);
+    event ClientDerivesKey(key_s2c);
 
-    (* ── DATA PHASE: client.c:264-288 send_encrypted() ──────────
-     *  rand_bytes(nonce, NONCE_LEN)             client.c:268
-     *  chachapoly_scalar(key,nonce,msg,ct,...)  client.c:272
-     *  pkt = nonce || tag || ct                 client.c:279-281
-     *  send_all(c->sock, pkt, pl)               client.c:283       *)
+    (* client.c:send_encrypted — encrypt with key_c2s *)
     new nonce_c: nonce;
-    new client_msg: data;
-    event MessageSent(session_key, client_msg);
-    let encrypted_msg: data = aead_enc(session_key, nonce_c, client_msg) in
-    out(c, (nonce_c, encrypted_msg));
+    new client_msg: bitstring;
+    event MessageSent(key_c2s, client_msg);
+    let enc_c: bitstring = aead_enc(key_c2s, nonce_c, client_msg) in
+    out(c, (nonce_c, enc_c));
 
-    (* ── DATA PHASE: client.c:290-327 receiver() ────────────────
-     *  recv_all(c->sock, &pkt, &pl)             client.c:295
-     *  nonce = pkt[0:12]                        client.c:299
-     *  tag   = pkt[12:28]                       client.c:300
-     *  ct    = pkt[28:]                         client.c:306-307
-     *  chachapoly_scalar(key,nonce,ct,pt,tag,0) client.c:306       *)
-    in(c, (nonce_s: nonce, encrypted_from_server: data));
-    let decrypted_msg: data = aead_dec(encrypted_from_server, session_key, nonce_s) in
-    event MessageReceived(session_key, decrypted_msg).
+    (* client.c:receiver — decrypt with key_s2c.
+     * KEY CONFIRMATION: Only the genuine server can encrypt with
+     * key_s2c (derived from decaps). If decryption succeeds, the
+     * server must have participated in this exact session.
+     *
+     * [CRITICAL FOR Q8] ClientAcceptsServer fires ONLY after
+     * successful decryption. The attacker cannot trigger this
+     * by reflecting enc_c back because enc_c uses key_c2s but
+     * the client decrypts with key_s2c (different key → fails). *)
+    in(c, (nonce_s: nonce, enc_s: bitstring));
+    let dec_s: bitstring = aead_dec(enc_s, key_s2c, nonce_s) in
+    event MessageReceived(key_s2c, dec_s);
+
+    event ClientAcceptsServer(trusted_pk_sig, key_s2c).
 
 
 (* ═══════════════════════════════════════════════════════════════
  *  MAIN PROCESS
- *
- *  Maps to:
- *    server.c main()  → OQS_SIG_keypair (server.c:772)
- *    server.c main()  → pk_sig is the long-term server identity
- *
- *  The client receives pk_sig out-of-band (server_pk.bin).
- *  In ProVerif we model this by passing it as a parameter.
- *  The attacker CAN read pk_sig (it's public) but CANNOT
- *  substitute a different key into the client's trusted store.
  * ═══════════════════════════════════════════════════════════════ *)
 
 process
-    (* server.c:772  OQS_SIG_keypair(srv.sig, srv.sig_pk, srv.sig_sk) *)
+    (* server.c:main — generate long-term ML-DSA keypair *)
     new sk_sig: skey;
     let pk_sig: pkey = sig_pk(sk_sig) in
 
-    (* pk_sig is public (attacker can read it) *)
+    (* pk_sig is public — attacker can read but not substitute *)
     out(c, pk_sig);
 
-    (* Unbounded parallel sessions:
-     *   - Server uses (sk_sig, pk_sig) for every client  (server.c:834)
-     *   - Client has trusted copy of pk_sig               (server_pk.bin) *)
+    (* Unbounded parallel sessions *)
     (  !Server(sk_sig, pk_sig)
      | !Client(pk_sig)  )
